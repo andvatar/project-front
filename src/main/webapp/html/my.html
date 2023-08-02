@@ -1,11 +1,207 @@
 <html>
-<head>
-    <title>RPG</title>
-    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
-    <link href="/css/my.css" rel="stylesheet">
-</head>
-<body>
-<h1>RPG admin panel</h1>
+    <head>
+        <title>RPG</title>
+        <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
+        <script src="http://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <script src="/html/my.js"></script>
+    </head>
+    <body>
+        <h1>RPG admin panel</h1>
+        <h2>Accounts list:</h2>
+        <div class="form-group d-inline-flex flex-row align-items-center flex-wrap">
+            <label for="accounts" class="d-inline-block">Count per page:</label>
 
-</body>
+            <select id="accounts" class="form-select form-select-sm" aria-label="Default select example" style="width:auto; margin-left:5px">
+                <!--option selected>3</option-->
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+            </select>
+        </div>
+
+        <table
+                id="mainTable"
+                class="table table-bordered"
+        >
+            <tr>
+                <th scope="col" data-field="id">#</th>
+                <th scope="col" data-field="name">Name</th>
+                <th scope="col" data-field="title">Title</th>
+                <th scope="col" data-field="race">Race</th>
+                <th scope="col" data-field="profession"> Profession</th>
+                <th scope="col" data-field="level">Level</th>
+                <th scope="col" data-field="birthday">Birthday</th>
+                <th scope="col" data-field="banned">Banned</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
+            </tr>
+        </table>
+
+        <div class="form-group">
+            <nav aria-label="..." id="nav">
+                <ul class="pagination" id="ul1">
+                </ul>
+            </nav>
+        </div>
+
+        <hr/>
+        <h2>Create new account:</h2>
+        <form class="w-50">
+            <div class="row mb-3">
+                <label for="formName" class="col-sm-2 col-form-label">Name:</label>
+                <div class="col-sm-10">
+                    <input class="form-control" id="formName" maxlength="12" minlength="1">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="formTitle" class="col-sm-2 col-form-label">Title:</label>
+                <div class="col-sm-10">
+                    <input class="form-control" id="formTitle" maxlength="50" minlength="1">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="formRace" class="col-sm-2 col-form-label">Race:</label>
+                <div class="col-sm-10">
+                    <select class="form-select" id="formRace">
+                        <option selected value="HUMAN">HUMAN</option>
+                        <option value="DWARF">DWARF</option>
+                        <option value="ELF">ELF</option>
+                        <option value="GIANT">GIANT</option>
+                        <option value="ORC">ORC</option>
+                        <option value="TROLL">TROLL</option>
+                        <option value="HOBBIT">HOBBIT</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="formProfession" class="col-sm-2 col-form-label">Profession:</label>
+                <div class="col-sm-10">
+                    <select class="form-select" id="formProfession">
+                        <option value="WARRIOR">WARRIOR</option>
+                        <option value="ROGUE">ROGUE</option>
+                        <option value="SORCERER">SORCERER</option>
+                        <option value="CLERIC">CLERIC</option>
+                        <option value="PALADIN">PALADIN</option>
+                        <option value="NAZGUL">NAZGUL</option>
+                        <option value="WARLOCK">WARLOCK</option>
+                        <option value="DRUID">DRUID</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="formLevel" class="col-sm-2 col-form-label">Level:</label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control" id="formLevel" max="100" min="0">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="formBirthDate" class="col-sm-2 col-form-label">Birthday:</label>
+                <div class="col-sm-10">
+                    <input type="date" class="date form-control" id="formBirthDate">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="formBanned" class="col-sm-2 form-check-label">Banned:</label>
+                <div class="col-sm-10">
+                    <input type="checkbox" class="form-check-input" id="formBanned">
+                </div>
+            </div>
+
+            <div>
+                <button type="button" class="btn btn-primary" id="formSaveButton"><i class="bi bi-save" id="formSaveIcon"></i> Submit</button>
+            </div>
+        </form>
+
+        <script>
+            $(document).ready(function() {
+                getPlayers()
+                createPagination()
+            })
+            $('#accounts').on("change", function(){
+                getPlayers(getActivePage()-1, this.value)
+                createPagination()
+            })
+            $('#ul1').on("click", function (e) {
+                if(e.target && e.target.matches(".page-link")) {
+                    $('#ul1 li').removeClass("active")
+                    jQuery(e.target).parent('li').addClass("active")
+                    getPlayers(getActivePage()-1, $('#accounts')[0].value)
+                }
+            })
+            $('#mainTable').on("click", function(e) {
+                if(e.target && e.target.matches("#editIcon")) {
+                    let currentRow = jQuery(e.target).parent('button').parent('td').parent('tr')
+                    currentRow.find('#name, #title, #race, #profession').attr('contenteditable', 'true')
+                    currentRow.find('#race, #profession').find('select').prop('disabled', false)
+                    currentRow.find('#banned').find('#inputbanned').prop('disabled', false)
+                    currentRow.find('#delete').find('#deletebutton').hide()
+                    currentRow.find('#edit').find('#editbutton').hide()
+                    currentRow.find('#edit').find('#savebutton').show()
+                }
+                if(e.target && e.target.matches("#saveIcon")) {
+                    let currentRow = jQuery(e.target).parent('button').parent('td').parent('tr')
+                    let jsObj = Object.create(null)
+                    currentRow.find('#name, #title').each(function() {
+                        Object.defineProperty(jsObj, $(this).attr('id'), {value: $(this).text(), enumerable: true})
+                    })
+                    currentRow.find('#race, #profession').each(function() {
+                        Object.defineProperty(jsObj, $(this).attr('id'), {value: $(this).find(':selected').val(), enumerable: true})
+                    })
+                    Object.defineProperty(jsObj, 'banned', {value: !!currentRow.find('#banned').find('input').is(':checked'), enumerable: true})
+                    $.ajax({
+                        type: "POST",
+                        url: "/rest/players/" + currentRow.find('#id').text() + "?id=" + currentRow.find('#id').text(),
+                        dataType: 'json',
+                        data : JSON.stringify(jsObj),
+                        contentType: 'application/json; charset=utf-8'
+                    })
+                    getPlayers(getActivePage()-1, $('#accounts')[0].value)
+                }
+                if(e.target && e.target.matches("#deleteIcon")) {
+                    let currentRow = jQuery(e.target).parent('button').parent('td').parent('tr')
+                    $.ajax({
+                        type: "DELETE",
+                        url: "/rest/players/" + currentRow.find('#id').text() + "?id=" + currentRow.find('#id').text(),
+                    })
+                    getPlayers(getActivePage()-1, $('#accounts')[0].value)
+                }
+            })
+            $('#formSaveButton').click(function(){
+                let jsObj = Object.create(null)
+                Object.defineProperty(jsObj, 'name', {value: $('#formName').val(), enumerable: true})
+                Object.defineProperty(jsObj, 'title', {value: $('#formTitle').val(), enumerable: true})
+                Object.defineProperty(jsObj, 'race', {value: $('#formRace option:selected').text(), enumerable: true})
+                Object.defineProperty(jsObj, 'profession', {value: $('#formProfession option:selected').text(), enumerable: true})
+                Object.defineProperty(jsObj, 'birthday', {value: Date.parse($('#formBirthDate').val()), enumerable: true})
+                Object.defineProperty(jsObj, 'level', {value: parseInt($('#formLevel').val()), enumerable: true})
+                Object.defineProperty(jsObj, 'banned', {value: !!$('#formBanned').is(':checked'), enumerable: true})
+                console.log(jsObj)
+                $.ajax({
+                    type: "POST",
+                    url: "/rest/players/",
+                    dataType: 'json',
+                    data : JSON.stringify(jsObj),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function () {
+                        getPlayers(getActivePage()-1, $('#accounts')[0].value)
+                        $('#formName').val('')
+                        $('#formTitle').val('')
+                        $('#formRace').val('HUMAN')
+                        $('#formProfession').val('WARRIOR')
+                        $('#formBirthDate').val('')
+                        $('#formLevel').val('')
+                        $('#formBanned').prop( "checked", false )
+                    },
+                    error: function (jqXHR, exception) {
+                        window.alert(jqXHR.responseText)
+                    }
+                })
+            })
+        </script>
+    </body>
 </html>
